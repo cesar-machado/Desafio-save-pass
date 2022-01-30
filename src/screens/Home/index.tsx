@@ -30,37 +30,53 @@ export function Home() {
 
   async function loadData() {
     const dataKey = '@savepass:logins';
+    const response = await AsyncStorage.getItem(dataKey);
+    const listData = response ? JSON.parse(response) : [];
+
+    setSearchListData(listData);
+    setData(listData);
     // Get asyncStorage data, use setSearchListData and setData
   }
 
   function handleFilterLoginData() {
+    const filtered = searchListData.filter((data) => {
+      if (data.service_name.includes(searchText)) return data;
+    });
+    console.log(filtered);
+
+    setSearchListData(filtered);
     // Filter results inside data, save with setSearchListData
   }
 
   function handleChangeInputText(text: string) {
+    if (!text) {
+      setSearchListData(data);
+    }
+    setSearchText(text);
     // Update searchText value
   }
 
-  useFocusEffect(useCallback(() => {
-    loadData();
-  }, []));
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [])
+  );
 
   return (
     <>
       <Header
         user={{
           name: 'Rocketseat',
-          avatar_url: 'https://i.ibb.co/ZmFHZDM/rocketseat.jpg'
+          avatar_url: 'https://i.ibb.co/ZmFHZDM/rocketseat.jpg',
         }}
       />
       <Container>
         <SearchBar
-          placeholder="Qual senha você procura?"
+          placeholder='Qual senha você procura?'
           onChangeText={handleChangeInputText}
           value={searchText}
-          returnKeyType="search"
+          returnKeyType='search'
           onSubmitEditing={handleFilterLoginData}
-
           onSearchButtonPress={handleFilterLoginData}
         />
 
@@ -69,8 +85,7 @@ export function Home() {
           <TotalPassCount>
             {searchListData.length
               ? `${`${searchListData.length}`.padStart(2, '0')} ao total`
-              : 'Nada a ser exibido'
-            }
+              : 'Nada a ser exibido'}
           </TotalPassCount>
         </Metadata>
 
@@ -78,14 +93,16 @@ export function Home() {
           keyExtractor={(item) => item.id}
           data={searchListData}
           renderItem={({ item: loginData }) => {
-            return <LoginDataItem
-              service_name={loginData.service_name}
-              email={loginData.email}
-              password={loginData.password}
-            />
+            return (
+              <LoginDataItem
+                service_name={loginData.service_name}
+                email={loginData.email}
+                password={loginData.password}
+              />
+            );
           }}
         />
       </Container>
     </>
-  )
+  );
 }
